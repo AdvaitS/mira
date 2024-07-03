@@ -1,0 +1,9 @@
+{
+	"fanPin" : 23,
+    "ringPin" : 18,
+    "heaterPin" : 13,
+    "positionSensorPin1" : 22, 
+    "positionSensorPin2" : 27,
+    "motorStepPin" : 16,
+    "motorDirPin" : 20
+}
