@@ -68,8 +68,8 @@ class Incubator():
 		elif publish_packet.topic == "request/motor":
 			self.motor_message(publish_packet.payload)
 			
-		elif publish_packet.topic == "request/image":
-			self.image_message(publish_packet.payload)
+		elif publish_packet.topic == "request/temperature":
+			self.temp_message(publish_packet.payload)
 			
 		elif publish_packet.topic == "request/status":
 			self.status_message(publish_packet.payload)
@@ -113,24 +113,8 @@ class Incubator():
 		elif command == 'anticlockwise':
 			self.motor.rotate(60, clockwise=False)
     
-	def image_message(self, payload):
+	def temp_message(self, payload):
 		#print(f"[{datetime.datetime.now().strftime(self.dtFormat)}]		Received message: {message.payload}")
-		image = self.camera.take_snapshot()		#TODO
-		try:
-			filename = "snap.jpg"#f"{self.name}_{datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.jpg"
-			key = os.path.join(self.aws_folder, filename)
-			image_string = cv2.imencode('.jpg', image)[1].tobytes()
-			self.s3.put_object(Bucket=self.bucket_name, Key = key, Body=image_string)
-			s3_url = f"https://{self.bucket_name}.s3.amazonaws.com/{key}"
-			presigned_url = self.generate_presigned_url(key)
-			payload = {"status": "1", "image_url": presigned_url}
-			print(f"[{datetime.datetime.now().strftime(self.dtFormat)}]		Sending message: {payload}")
-			self.mqtt_client.publish(mqtt5.PublishPacket(topic="response/image", payload=json.dumps(payload), qos=mqtt5.QoS.AT_LEAST_ONCE))
-		except Exception as e:
-			print(e)
-			payload = {"status": "0", "image_url": "None"}
-			print(f"[{datetime.datetime.now().strftime(self.dtFormat)}]		Sending message: {payload}")
-			self.mqtt_client.publish(mqtt5.PublishPacket(topic="response/image", payload=json.dumps(payload), qos=mqtt5.QoS.AT_LEAST_ONCE))
 			
 		#self.mqtt_client.publish(mqtt5.PublishPacket(topic="response/image", payload=json.dumps(payload), qos=mqtt5.QoS.AT_LEAST_ONCE))
 	def generate_presigned_url(self, object_name, expiration=3600):
